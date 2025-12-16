@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rose OS Update Manager</title>
+
+<style>
+/* ===== Rose OS Style ===== */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #0f0f14;
+  color: #ffffff;
+}
+
+header {
+  text-align: center;
+  padding: 30px;
+  background: linear-gradient(135deg, #ff4f8b, #7c4dff);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.2em;
+}
+
+header p {
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background: #1a1a22;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 0 25px rgba(255,79,139,0.15);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin-top: 12px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: none;
+  background: #2a2a35;
+  color: white;
+  font-size: 1em;
+}
+
+textarea {
+  height: 90px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 18px;
+  padding: 12px;
+  width: 100%;
+  border-radius: 12px;
+  border: none;
+  background: #ff4f8b;
+  color: white;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff2e75;
+}
+
+pre {
+  background: #000;
+  padding: 12px;
+  border-radius: 10px;
+  max-height: 320px;
+  overflow: auto;
+  font-size: 0.85em;
+}
+
+footer {
+  text-align: center;
+  padding: 12px;
+  opacity: 0.5;
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌹 Rose OS Update Manager</h1>
+  <p>Create and publish system updates</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Create Update</h2>
+
+    <label>Version</label>
+    <input id="version" placeholder="1.0.0">
+
+    <label>Release Name</label>
+    <input id="name" placeholder="Spring Bloom">
+
+    <label>Update Type</label>
+    <select id="type">
+      <option value="system">System</option>
+      <option value="apps">Apps</option>
+      <option value="security">Security</option>
+    </select>
+
+    <label>Update Notes (one per line)</label>
+    <textarea id="notes" placeholder="Bug fixes&#10;New features&#10;Performance improvements"></textarea>
+
+    <button onclick="buildUpdate()">Build Update</button>
+  </section>
+
+  <section class="card">
+    <h2>latest.json Output</h2>
+    <pre id="output">// waiting for build…</pre>
+    <button onclick="download()">Download latest.json</button>
+  </section>
+</main>
+
+<footer>
+  Rose OS • Update Infrastructure
+</footer>
+
+<script>
+/* ===== Update Builder Logic ===== */
+let latestData = null;
+
+function buildUpdate() {
+  const version = document.getElementById("version").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const type = document.getElementById("type").value;
+  const notesRaw = document.getElementById("notes").value;
+
+  if (!version || !name) {
+    alert("Version and release name are required");
+    return;
+  }
+
+  latestData = {
+    os: "Rose OS",
+    version: version,
+    name: name,
+    type: type,
+    released: new Date().toISOString(),
+    notes: notesRaw.split("\n").filter(n => n.trim() !== ""),
+    url: "https://YOUR_GITHUB_USERNAME.github.io/rose-os/updates/" + version + ".zip"
+  };
+
+  document.getElementById("output").textContent =
+    JSON.stringify(latestData, null, 2);
+}
+
+function download() {
+  if (!latestData) {
+    alert("Build an update first");
+    return;
+  }
+
+  const blob = new Blob(
+    [JSON.stringify(latestData, null, 2)],
+    { type: "application/json" }
+  );
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "latest.json";
+  link.click();
+}
+</script>
+
+</body>
+</html>
